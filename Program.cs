@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Core.Types;
 using testAPIs.Models;
+using testAPIs.Controllers;
 
 namespace testAPIs
 {
@@ -49,6 +50,8 @@ namespace testAPIs
 
 
             app.MapControllers();
+
+                        //app.MapUserTablesControllerEndpoints();
 
             app.Run();
         }
