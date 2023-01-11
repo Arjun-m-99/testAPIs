@@ -23,9 +23,9 @@ namespace testAPIs
 
 
 
-            builder.Services.AddDbContextPool<TestDbContext>(options =>
+            builder.Services.AddDbContext<TestDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("TestDatabase"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
             });
             // Add services to the container.
 

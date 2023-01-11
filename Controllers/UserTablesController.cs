@@ -29,9 +29,9 @@ namespace testAPIs.Controllers
 
         // GET: api/UserTables/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserTable>> GetUserTable(string id)
+        public async Task<ActionResult<UserTable>> GetUserTable(string Id)
         {
-            var userTable = await _context.UserTables.FindAsync(id);
+            var userTable = await _context.UserTables.FindAsync(Id);
 
             if (userTable == null)
             {
