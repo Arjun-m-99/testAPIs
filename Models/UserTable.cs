@@ -24,4 +24,10 @@ public partial class UserTable
     public DateTime CreatedDate { get; set; }
 }
 
+public class LogInReqBody
+{
+    public string email { get; set; }
+
+    public string password { get; set;}
+}
 
