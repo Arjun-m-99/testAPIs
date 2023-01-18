@@ -11,19 +11,6 @@ namespace testAPIs
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            //var connection = builder.Configuration.GetConnectionString("TestDataBase");
-            //builder.Services.AddDbContext<TestDbContext>(options =>
-            //{
-            //    options.UseSqlServer(builder.Configuration.GetConnectionString("TestDatabase"));
-            //        //sqlServerOptionsAction:sqlOptions =>
-            //        //{
-            //        //    sqlOptions.EnableRetryOnFailure();
-            //        //}
-            //        //);
-            //});
-
-
-
             builder.Services.AddDbContext<TestDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));

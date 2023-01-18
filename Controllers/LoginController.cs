@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using NuGet.Versioning;
 using testAPIs.Models;
 
@@ -29,6 +30,20 @@ namespace testAPIs.Controllers
         }
 
         // GET: api/Login/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserTable>> GetUserTable(int id)
+        {
+            var userTable = await _context.UserTables.FindAsync(id);
+
+            if (userTable == null)
+            {
+                return NotFound();
+            }
+
+            return userTable;
+        }
+
+        // GET: api/Login/
         [HttpGet("{email}/{password}")]
         public async Task<ActionResult<UserTable>> GetUserTable(string email,string password)
         {
@@ -90,7 +105,7 @@ namespace testAPIs.Controllers
         // POST: api/Login
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UserTable>> PostUserTable(LogInReqBody logInReqBody)
+        public async Task<ActionResult<UserTable>> UserLogin(LogInReqBody logInReqBody)
         {
             var userDetails = new UserTable();
             
@@ -110,6 +125,36 @@ namespace testAPIs.Controllers
             }
 
             return NotFound();
+        }
+
+        // POST: api/Login
+        [HttpPost("/signUp")]
+        public async Task<ActionResult<UserTable>> UserSignUp(UserTable userTable)
+        {
+            //try
+            //{
+                _context.UserTables.Add(userTable);
+                await _context.SaveChangesAsync();
+            //}
+            //catch (Exception ex)
+            //{
+            //    var sqlException = ex.InnerException;
+
+            //    //return BadRequest(sqlException + " \n get excep "+ex.GetBaseException+" \n type"+ex.GetType+" \n "+ ex.InnerException.Message);
+
+            //    if (sqlException.Message.Contains("Violation of UNIQUE KEY constraint") && sqlException.Message.Contains("EmailColumn"))
+            //    {
+            //        return BadRequest("Cannot insert duplicate values.");
+            //    }else 
+            //    //if(sqlException.Message.Contains("Violation of UNIQUE KEY constraint") && sqlException.Message.Contains("PhoneNumber"))
+                
+            //    {
+            //        //return BadRequest("Error while saving data.");
+            //        return BadRequest(ex);
+            //    }
+            //}
+
+            return CreatedAtAction("GetUserTable", new { id = userTable.Id }, userTable);
         }
 
         // DELETE: api/Login/5
