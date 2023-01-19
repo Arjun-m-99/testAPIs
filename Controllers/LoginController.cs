@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NuGet.Protocol;
 using NuGet.Versioning;
 using testAPIs.Models;
@@ -15,11 +20,20 @@ namespace testAPIs.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
+
+        private readonly IConfiguration _config;
+        //public LoginController(IConfiguration config)
+        //{
+        //    _config = config;
+        //}
+
         private readonly TestDbContext _context;
 
-        public LoginController(TestDbContext context)
+        public LoginController(TestDbContext context, IConfiguration config)
         {
             _context = context;
+
+            _config = config;
         }
 
         // GET: api/Login
@@ -31,6 +45,7 @@ namespace testAPIs.Controllers
 
         // GET: api/Login/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<UserTable>> GetUserTable(int id)
         {
             var userTable = await _context.UserTables.FindAsync(id);
@@ -44,38 +59,40 @@ namespace testAPIs.Controllers
         }
 
         // GET: api/Login/
-        [HttpGet("{email}/{password}")]
-        public async Task<ActionResult<UserTable>> GetUserTable(string email,string password)
-        {
-            var userDetails=new UserTable();
-            //var userDetailsList=new List<UserTable>();
-            //userDetailsList= await _context.UserTables.ToListAsync();
+        //[HttpGet("{email}/{password}")]
+        //public async Task<ActionResult<UserTable>> GetUserTable(string email,string password)
+        //{
+        //    var userDetails=new UserTable();
+        //    //var userDetailsList=new List<UserTable>();
+        //    //userDetailsList= await _context.UserTables.ToListAsync();
 
-            //Console.WriteLine(userDetails+"from 38");
-            var userTable = await _context.UserTables.Where(x =>  x.Email == email && x.Password == password).FirstOrDefaultAsync();
-            /*var userTable1 = await _context.UserTables.FindBestMatch(id);*/
+        //    //Console.WriteLine(userDetails+"from 38");
+        //    var userTable = await _context.UserTables.Where(x =>  x.Email == email && x.Password == password).FirstOrDefaultAsync();
+        //    /*var userTable1 = await _context.UserTables.FindBestMatch(id);*/
 
-            if (userTable != null && userTable.Password==password)
-            {
-                //userDetails.Id = id;
-                userDetails.FirstName= userTable.FirstName;
-                userDetails.LastName = userTable.LastName;
-                userDetails.PhoneNumber = userTable.PhoneNumber;
-                userDetails.Email = userTable.Email;
-                userDetails.AadharNumber= userTable.AadharNumber;
-                userDetails.Passport= userTable.Passport;
+        //    if (userTable != null && userTable.Password==password)
+        //    {
+        //        //userDetails.Id = id;
+        //        userDetails.FirstName= userTable.FirstName;
+        //        userDetails.LastName = userTable.LastName;
+        //        userDetails.PhoneNumber = userTable.PhoneNumber;
+        //        userDetails.Email = userTable.Email;
+        //        userDetails.AadharNumber= userTable.AadharNumber;
+        //        userDetails.Passport= userTable.Passport;
 
-                return userDetails;   
-            }
+        //        return userDetails;   
+        //    }
 
-            return NotFound();
-        }
+        //    return NotFound();
+        //}
 
         // PUT: api/Login/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserTable(int id, UserTable userTable)
         {
+            var currentUser = GetCurrentUser();
+
             if (id != userTable.Id)
             {
                 return BadRequest();
@@ -102,32 +119,85 @@ namespace testAPIs.Controllers
             return NoContent();
         }
 
+        private async Task<ActionResult<UserTable>> GetCurrentUser()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var userClaims = identity.Claims;
+                return new UserTable
+                {
+                    Email = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value,
+                    //Role = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value
+                };
+            }
+            return Unauthorized();
+        }
+
         // POST: api/Login
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<UserTable>> UserLogin(LogInReqBody logInReqBody)
         {
-            var userDetails = new UserTable();
+            //var userDetails = new UserTable();
             
-            var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
+            //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
-            if (userTable != null)
+            var user = Authenticate(logInReqBody);
+
+            if (user != null)
             {
-                //userDetails.Id = id;
-                userDetails.FirstName = userTable.FirstName;
-                userDetails.LastName = userTable.LastName;
-                userDetails.PhoneNumber = userTable.PhoneNumber;
-                userDetails.Email = userTable.Email;
-                userDetails.AadharNumber = userTable.AadharNumber;
-                userDetails.Passport = userTable.Passport;
+                var token = GenerateToken(user);
+                return Ok(token);
 
-                return userDetails;
+                //userDetails.Id = id;
+                //userDetails.FirstName = userTable.FirstName;
+                //userDetails.LastName = userTable.LastName;
+                //userDetails.PhoneNumber = userTable.PhoneNumber;
+                //userDetails.Email = userTable.Email;
+                //userDetails.AadharNumber = userTable.AadharNumber;
+                //userDetails.Passport = userTable.Passport;
+
+                //return userDetails;
             }
 
-            return NotFound();
+            return NotFound("UserID or Password Invalid");
         }
 
-        // POST: api/Login
+        // To generate token
+        private string GenerateToken(UserTable user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier,user.Email),
+                //new Claim(ClaimTypes.Role,user.Role)
+            };
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: credentials);
+
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+
+        }
+
+        //To authenticate user
+        private UserTable Authenticate(LogInReqBody userLogin)
+        {
+            var currentUser = _context.UserTables.FirstOrDefault(x => x.Email.ToLower() ==
+                userLogin.email.ToLower() && x.Password == userLogin.password);
+            if (currentUser != null)
+            {
+                return currentUser;
+            }
+            return null;
+        }
+
+        // POST: signUp
         [HttpPost("/signUp")]
         public async Task<ActionResult<UserTable>> UserSignUp(UserTable userTable)
         {
