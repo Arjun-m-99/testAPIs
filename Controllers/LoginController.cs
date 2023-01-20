@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace testAPIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LoginController : ControllerBase
     {
 
@@ -45,7 +47,7 @@ namespace testAPIs.Controllers
 
         // GET: api/Login/5
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(Roles ="USER")]
         public async Task<ActionResult<UserTable>> GetUserTable(int id)
         {
             var userTable = await _context.UserTables.FindAsync(id);
@@ -91,7 +93,6 @@ namespace testAPIs.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserTable(int id, UserTable userTable)
         {
-            var currentUser = GetCurrentUser();
 
             if (id != userTable.Id)
             {
@@ -119,24 +120,12 @@ namespace testAPIs.Controllers
             return NoContent();
         }
 
-        private async Task<ActionResult<UserTable>> GetCurrentUser()
-        {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            if (identity != null)
-            {
-                var userClaims = identity.Claims;
-                return new UserTable
-                {
-                    Email = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value,
-                    //Role = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value
-                };
-            }
-            return Unauthorized();
-        }
+        
 
         // POST: api/Login
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult> UserLogin(LogInReqBody logInReqBody)
         {
             //var userDetails = new UserTable();
@@ -145,7 +134,7 @@ namespace testAPIs.Controllers
 
             //var user = Authenticate(logInReqBody);
             var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password);
-            Console.WriteLine(user);
+            //Console.WriteLine(user);
             //if (user == null)
             //{
             //    return NotFound();
@@ -173,18 +162,22 @@ namespace testAPIs.Controllers
         // To generate token
         private string GenerateToken(UserTable user)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier,user.Email),
-                //new Claim(ClaimTypes.Role,user.Role)
+                new Claim(ClaimTypes.Role,user.Role)
             };
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            
+            var token = new JwtSecurityToken(
+                _config["Jwt:Issuer"],
                 _config["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: credentials);
+                expires: DateTime.Now.AddMinutes(10),
+                signingCredentials: credentials
+                );
 
 
             return new JwtSecurityTokenHandler().WriteToken(token);
