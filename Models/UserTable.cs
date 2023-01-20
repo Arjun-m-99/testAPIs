@@ -22,6 +22,8 @@ public partial class UserTable
     public long? AadharNumber { get; set; }
 
     public DateTime CreatedDate { get; set; }
+
+    public string? Role { get; set;}
 }
 
 public class LogInReqBody

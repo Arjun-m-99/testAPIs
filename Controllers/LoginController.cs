@@ -137,13 +137,19 @@ namespace testAPIs.Controllers
         // POST: api/Login
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UserTable>> UserLogin(LogInReqBody logInReqBody)
+        public async Task<ActionResult> UserLogin(LogInReqBody logInReqBody)
         {
             //var userDetails = new UserTable();
-            
+
             //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
-            var user = Authenticate(logInReqBody);
+            //var user = Authenticate(logInReqBody);
+            var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password);
+            Console.WriteLine(user);
+            //if (user == null)
+            //{
+            //    return NotFound();
+            //}
 
             if (user != null)
             {
@@ -161,14 +167,14 @@ namespace testAPIs.Controllers
                 //return userDetails;
             }
 
-            return NotFound("UserID or Password Invalid");
+            return NotFound("Invalid User Name or Password");
         }
 
         // To generate token
         private string GenerateToken(UserTable user)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier,user.Email),
@@ -186,16 +192,16 @@ namespace testAPIs.Controllers
         }
 
         //To authenticate user
-        private UserTable Authenticate(LogInReqBody userLogin)
-        {
-            var currentUser = _context.UserTables.FirstOrDefault(x => x.Email.ToLower() ==
-                userLogin.email.ToLower() && x.Password == userLogin.password);
-            if (currentUser != null)
-            {
-                return currentUser;
-            }
-            return null;
-        }
+        //private UserTable Authenticate(LogInReqBody userLogin)
+        //{
+        //    var currentUser = _context.UserTables.FirstOrDefault(x => x.Email.ToLower() ==
+        //        userLogin.email.ToLower() && x.Password == userLogin.password);
+        //    if (currentUser != null)
+        //    {
+        //        return currentUser;
+        //    }
+        //    return null;
+        //}
 
         // POST: signUp
         [HttpPost("/signUp")]
