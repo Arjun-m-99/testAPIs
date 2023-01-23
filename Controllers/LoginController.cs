@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using NuGet.Protocol;
 using NuGet.Versioning;
 using testAPIs.Models;
+using testAPIs.DTO;
 
 namespace testAPIs.Controllers
 {
@@ -40,53 +41,55 @@ namespace testAPIs.Controllers
 
         // GET: api/Login
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserTable>>> GetUserTables()
+        public async Task<List<GetUserTableDTO>> GetUserTables()
         {
-            return await _context.UserTables.ToListAsync();
+            List< GetUserTableDTO> getUserTableDTO = new List<GetUserTableDTO>();
+            //return await _context.UserTables.ToListAsync();
+            foreach(UserTable userTable in await _context.UserTables.ToListAsync())
+            {
+                GetUserTableDTO getUserTableDTO1 = new GetUserTableDTO();
+                getUserTableDTO1.Id = userTable.Id;
+                getUserTableDTO1.FirstName = userTable.FirstName;
+                getUserTableDTO1.LastName = userTable.LastName;
+                getUserTableDTO1.Email = userTable.Email;
+                getUserTableDTO1.PhoneNumber = userTable.PhoneNumber;
+                getUserTableDTO1.AadharNumber = userTable.AadharNumber;
+                getUserTableDTO1.Passport = userTable.Passport;
+                getUserTableDTO1.Role = userTable.Role;
+                getUserTableDTO1.CreatedDate = userTable.CreatedDate;
+                getUserTableDTO.Add(getUserTableDTO1);
+            }
+
+            return getUserTableDTO;
+
         }
 
         // GET: api/Login/5
         [HttpGet("{id}")]
-        [Authorize(Roles ="USER")]
-        public async Task<ActionResult<UserTable>> GetUserTable(int id)
+        [Authorize]
+        public async Task<ActionResult<GetUserTableDTO>> GetUserTable(int id)
         {
             var userTable = await _context.UserTables.FindAsync(id);
+
+            var userDetails = new GetUserTableDTO();
 
             if (userTable == null)
             {
                 return NotFound();
             }
 
-            return userTable;
+            //return userTable;
+            userDetails.Id = id;
+            userDetails.FirstName = userTable.FirstName;
+            userDetails.LastName = userTable.LastName;
+            userDetails.PhoneNumber = userTable.PhoneNumber;
+            userDetails.Email = userTable.Email;
+            userDetails.AadharNumber = userTable.AadharNumber;  
+            userDetails.Passport = userTable.Passport;
+            userDetails.Role = userTable.Role;
+
+            return userDetails;
         }
-
-        // GET: api/Login/
-        //[HttpGet("{email}/{password}")]
-        //public async Task<ActionResult<UserTable>> GetUserTable(string email,string password)
-        //{
-        //    var userDetails=new UserTable();
-        //    //var userDetailsList=new List<UserTable>();
-        //    //userDetailsList= await _context.UserTables.ToListAsync();
-
-        //    //Console.WriteLine(userDetails+"from 38");
-        //    var userTable = await _context.UserTables.Where(x =>  x.Email == email && x.Password == password).FirstOrDefaultAsync();
-        //    /*var userTable1 = await _context.UserTables.FindBestMatch(id);*/
-
-        //    if (userTable != null && userTable.Password==password)
-        //    {
-        //        //userDetails.Id = id;
-        //        userDetails.FirstName= userTable.FirstName;
-        //        userDetails.LastName = userTable.LastName;
-        //        userDetails.PhoneNumber = userTable.PhoneNumber;
-        //        userDetails.Email = userTable.Email;
-        //        userDetails.AadharNumber= userTable.AadharNumber;
-        //        userDetails.Passport= userTable.Passport;
-
-        //        return userDetails;   
-        //    }
-
-        //    return NotFound();
-        //}
 
         // PUT: api/Login/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -132,13 +135,7 @@ namespace testAPIs.Controllers
 
             //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
-            //var user = Authenticate(logInReqBody);
             var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password);
-            //Console.WriteLine(user);
-            //if (user == null)
-            //{
-            //    return NotFound();
-            //}
 
             if (user != null)
             {
@@ -184,20 +181,10 @@ namespace testAPIs.Controllers
 
         }
 
-        //To authenticate user
-        //private UserTable Authenticate(LogInReqBody userLogin)
-        //{
-        //    var currentUser = _context.UserTables.FirstOrDefault(x => x.Email.ToLower() ==
-        //        userLogin.email.ToLower() && x.Password == userLogin.password);
-        //    if (currentUser != null)
-        //    {
-        //        return currentUser;
-        //    }
-        //    return null;
-        //}
-
         // POST: signUp
-        [HttpPost("/signUp")]
+        [Route("/signUp")]
+        [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<UserTable>> UserSignUp(UserTable userTable)
         {
             //try
@@ -228,6 +215,7 @@ namespace testAPIs.Controllers
 
         // DELETE: api/Login/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> DeleteUserTable(int id)
         {
             var userTable = await _context.UserTables.FindAsync(id);
