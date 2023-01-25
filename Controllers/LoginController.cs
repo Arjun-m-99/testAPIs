@@ -123,13 +123,13 @@ namespace testAPIs.Controllers
             return NoContent();
         }
 
-        
+
 
         // POST: api/Login
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> UserLogin(LogInReqBody logInReqBody)
+        public ActionResult UserLogin(LogInReqBody logInReqBody)
         {
             //var userDetails = new UserTable();
 
