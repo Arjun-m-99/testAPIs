@@ -14,9 +14,9 @@
 
         public long? AadharNumber { get; set; }
 
-        public DateTime CreatedDate { get; set; }
+        //public DateTime CreatedDate { get; set; }
 
-        public string? Role { get; set; }
+        //public string? Role { get; set; }
 
     }
     public class CreateUserTableDTO : UserTableDTO
@@ -36,5 +36,9 @@
     public class GetUserTableDTO : UserTableDTO
     {
         public int Id { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
+        public string? Role { get; set; }
     }
 }

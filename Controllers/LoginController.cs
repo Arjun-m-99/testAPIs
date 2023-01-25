@@ -54,7 +54,8 @@ namespace testAPIs.Controllers
                 getUserTableDTO1.Email = userTable.Email;
                 getUserTableDTO1.PhoneNumber = userTable.PhoneNumber;
                 getUserTableDTO1.AadharNumber = userTable.AadharNumber;
-                getUserTableDTO1.Passport = userTable.Passport;
+                //getUserTableDTO1.Passport = userTable.Passport;
+                getUserTableDTO1.Passport = EncodeToBase64(userTable.Passport);
                 getUserTableDTO1.Role = userTable.Role;
                 getUserTableDTO1.CreatedDate = userTable.CreatedDate;
                 getUserTableDTO.Add(getUserTableDTO1);
@@ -62,6 +63,42 @@ namespace testAPIs.Controllers
 
             return getUserTableDTO;
 
+        }
+
+        //this function Convert to Encord your Password
+        private static string EncodeToBase64(string passportNumber)
+        {
+            //try
+            //{
+            if (passportNumber != null)
+            {
+                byte[] encData_byte = new byte[passportNumber.Length];
+                encData_byte = System.Text.Encoding.UTF8.GetBytes(passportNumber);
+                string encodedData = Convert.ToBase64String(encData_byte);
+                return encodedData;
+            }
+            return passportNumber;
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("Error in base64Encode" + ex.Message);
+            //}
+        }
+        //this function Convert to Decord your Password
+        private string DecodeFrom64(string encodedData)
+        {
+            if (encodedData != null)
+            {
+                System.Text.UTF8Encoding encoder = new System.Text.UTF8Encoding();
+                System.Text.Decoder utf8Decode = encoder.GetDecoder();
+                byte[] todecode_byte = Convert.FromBase64String(encodedData);
+                int charCount = utf8Decode.GetCharCount(todecode_byte, 0, todecode_byte.Length);
+                char[] decoded_char = new char[charCount];
+                utf8Decode.GetChars(todecode_byte, 0, todecode_byte.Length, decoded_char, 0);
+                string result = new String(decoded_char);
+                return result;
+            }
+            return encodedData;
         }
 
         // GET: api/Login/5
@@ -85,7 +122,8 @@ namespace testAPIs.Controllers
             userDetails.PhoneNumber = userTable.PhoneNumber;
             userDetails.Email = userTable.Email;
             userDetails.AadharNumber = userTable.AadharNumber;  
-            userDetails.Passport = userTable.Passport;
+            //userDetails.Passport = userTable.Passport;
+            userDetails.Passport = DecodeFrom64(userTable.Passport);
             userDetails.Role = userTable.Role;
 
             return userDetails;
@@ -185,11 +223,22 @@ namespace testAPIs.Controllers
         [Route("/signUp")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<UserTable>> UserSignUp(UserTable userTable)
+        public async Task<ActionResult<GetUserTableDTO>> UserSignUp(CreateUserTableDTO userTableDto)
         {
+            var userDetails = new UserTable();
+            //userDetails.Id = id;
+            userDetails.FirstName = userTableDto.FirstName;
+            userDetails.LastName = userTableDto.LastName;
+            userDetails.PhoneNumber = userTableDto.PhoneNumber;
+            userDetails.Email = userTableDto.Email;
+            userDetails.AadharNumber = userTableDto.AadharNumber;
+            userDetails.Password = userTableDto.Password;
+            userDetails.Passport = EncodeToBase64(userTableDto.Passport);
+            //userDetails.Role = userTable.Role;
             //try
             //{
-                _context.UserTables.Add(userTable);
+            //userTable.Passport = EncodeToBase64(userTableDto.Passport);
+                _context.UserTables.Add(userDetails);
                 await _context.SaveChangesAsync();
             //}
             //catch (Exception ex)
@@ -203,14 +252,15 @@ namespace testAPIs.Controllers
             //        return BadRequest("Cannot insert duplicate values.");
             //    }else 
             //    //if(sqlException.Message.Contains("Violation of UNIQUE KEY constraint") && sqlException.Message.Contains("PhoneNumber"))
-                
+
             //    {
             //        //return BadRequest("Error while saving data.");
             //        return BadRequest(ex);
             //    }
             //}
 
-            return CreatedAtAction("GetUserTable", new { id = userTable.Id }, userTable);
+            //return CreatedAtAction("GetUserTable", new { id = userDetails.Id }, userDetails);
+            return Ok(GetUserTable(userDetails.Id).Result);
         }
 
         // DELETE: api/Login/5
