@@ -55,7 +55,7 @@ namespace testAPIs.Controllers
                 getUserTableDTO1.PhoneNumber = userTable.PhoneNumber;
                 getUserTableDTO1.AadharNumber = userTable.AadharNumber;
                 //getUserTableDTO1.Passport = userTable.Passport;
-                getUserTableDTO1.Passport = EncodeToBase64(userTable.Passport);
+                getUserTableDTO1.Passport = DecodeFrom64(userTable.Passport);
                 getUserTableDTO1.Role = userTable.Role;
                 getUserTableDTO1.CreatedDate = userTable.CreatedDate;
                 getUserTableDTO.Add(getUserTableDTO1);
@@ -85,7 +85,7 @@ namespace testAPIs.Controllers
             //}
         }
         //this function Convert to Decord your Password
-        private string DecodeFrom64(string encodedData)
+        private static string DecodeFrom64(string encodedData)
         {
             if (encodedData != null)
             {
@@ -132,15 +132,26 @@ namespace testAPIs.Controllers
         // PUT: api/Login/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUserTable(int id, UserTable userTable)
+        public async Task<IActionResult> PutUserTable(int id, UpdateUserTableDTO userTableDTO)
         {
 
-            if (id != userTable.Id)
+            if (id != userTableDTO.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(userTable).State = EntityState.Modified;
+            var userDetails = await _context.UserTables.FindAsync(id);
+            //userDetails.Id = id;
+            userDetails.FirstName = userTableDTO.FirstName;
+            userDetails.LastName = userTableDTO.LastName;
+            userDetails.PhoneNumber = userTableDTO.PhoneNumber;
+            userDetails.Email = userTableDTO.Email;
+            userDetails.AadharNumber = userTableDTO.AadharNumber;
+            userDetails.Password = userTableDTO.Password;
+            userDetails.Passport = EncodeToBase64(userTableDTO.Passport);
+            //userDetails.Role = userTableDTO.Role;
+
+            _context.Entry(userDetails).State = EntityState.Modified;
 
             try
             {
@@ -260,7 +271,7 @@ namespace testAPIs.Controllers
             //}
 
             //return CreatedAtAction("GetUserTable", new { id = userDetails.Id }, userDetails);
-            return Ok(GetUserTable(userDetails.Id).Result);
+            return Ok(GetUserTable(userDetails.Id).Result.Value);
         }
 
         // DELETE: api/Login/5
