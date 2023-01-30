@@ -28,8 +28,8 @@ public partial class UserTable
 
 public class LogInReqBody
 {
-    public string email { get; set; } = null!;
+    public string Email { get; set; } = null!;
 
-    public string password { get; set; } = null!;
+    public string Password { get; set; } = null!;
 }
 

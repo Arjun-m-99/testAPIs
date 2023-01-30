@@ -43,21 +43,23 @@ namespace testAPIs.Controllers
         [HttpGet]
         public async Task<List<GetUserTableDTO>> GetUserTables()
         {
-            List< GetUserTableDTO> getUserTableDTO = new List<GetUserTableDTO>();
+            List< GetUserTableDTO> getUserTableDTO = new();
             //return await _context.UserTables.ToListAsync();
             foreach(UserTable userTable in await _context.UserTables.ToListAsync())
             {
-                GetUserTableDTO getUserTableDTO1 = new GetUserTableDTO();
-                getUserTableDTO1.Id = userTable.Id;
-                getUserTableDTO1.FirstName = userTable.FirstName;
-                getUserTableDTO1.LastName = userTable.LastName;
-                getUserTableDTO1.Email = userTable.Email;
-                getUserTableDTO1.PhoneNumber = userTable.PhoneNumber;
-                getUserTableDTO1.AadharNumber = userTable.AadharNumber;
-                //getUserTableDTO1.Passport = userTable.Passport;
-                getUserTableDTO1.Passport = DecodeFrom64(userTable.Passport);
-                getUserTableDTO1.Role = userTable.Role;
-                getUserTableDTO1.CreatedDate = userTable.CreatedDate;
+                GetUserTableDTO getUserTableDTO1 = new()
+                {
+                    Id = userTable.Id,
+                    FirstName = userTable.FirstName,
+                    LastName = userTable.LastName,
+                    Email = userTable.Email,
+                    PhoneNumber = userTable.PhoneNumber,
+                    AadharNumber = userTable.AadharNumber,
+                    //getUserTableDTO1.Passport = userTable.Passport;
+                    Passport = DecodeFrom64(userTable.Passport),
+                    Role = userTable.Role,
+                    CreatedDate = userTable.CreatedDate
+                };
                 getUserTableDTO.Add(getUserTableDTO1);
             }
 
@@ -184,22 +186,13 @@ namespace testAPIs.Controllers
 
             //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
-            var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password);
+            var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.Email && x.Password == logInReqBody.Password);
 
             if (user != null)
             {
                 var token = GenerateToken(user);
                 return Ok(token);
 
-                //userDetails.Id = id;
-                //userDetails.FirstName = userTable.FirstName;
-                //userDetails.LastName = userTable.LastName;
-                //userDetails.PhoneNumber = userTable.PhoneNumber;
-                //userDetails.Email = userTable.Email;
-                //userDetails.AadharNumber = userTable.AadharNumber;
-                //userDetails.Passport = userTable.Passport;
-
-                //return userDetails;
             }
 
             return NotFound("Invalid User Name or Password");
