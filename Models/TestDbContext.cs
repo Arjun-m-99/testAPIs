@@ -15,14 +15,44 @@ public partial class TestDbContext : DbContext
     {
     }
 
+    public virtual DbSet<UserActivityTable> UserActivityTables { get; set; }
+
     public virtual DbSet<UserTable> UserTables { get; set; }
 
-    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseSqlServer("Server=LAPTOP-8FNAGHOU;Database=testDB;Integrated Security=True;TrustServerCertificate=True;");
+//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+//        => optionsBuilder.UseSqlServer("Server=LAPTOP-8FNAGHOU;Database=testDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<UserActivityTable>(entity =>
+        {
+            entity.HasKey(e => e.RowNumber);
+
+            entity.ToTable("UserActivityTable");
+
+            entity.HasIndex(e => e.RowNumber, "IX_UserActivityTable");
+
+            entity.Property(e => e.GeneratedToken).IsUnicode(false);
+            entity.Property(e => e.Ipaddress)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("IPAddress");
+            entity.Property(e => e.TimeDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("Time&Date");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.UserName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserActivityTables)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserActivityTable_UserTable");
+        });
+
         modelBuilder.Entity<UserTable>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_UserTable_1");
@@ -40,12 +70,6 @@ public partial class TestDbContext : DbContext
             entity.Property(e => e.Email)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-
-            entity.Property(e => e.Role)
-            .HasDefaultValue("USER")
-                .HasMaxLength(50)
-                .IsUnicode(false); ;
-
             entity.Property(e => e.FirstName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -59,6 +83,10 @@ public partial class TestDbContext : DbContext
             entity.Property(e => e.Password)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.Role)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasDefaultValueSql("('USER')");
         });
 
         OnModelCreatingPartial(modelBuilder);

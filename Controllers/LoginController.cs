@@ -182,7 +182,7 @@ namespace testAPIs.Controllers
         [AllowAnonymous]
         public ActionResult UserLogin(LogInReqBody logInReqBody)
         {
-            //var userDetails = new UserTable();
+            var userActivityTable = new UserActivityTable();
 
             //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
@@ -191,6 +191,14 @@ namespace testAPIs.Controllers
             if (user != null)
             {
                 var token = GenerateToken(user);
+                userActivityTable.UserId = user.Id;
+                userActivityTable.UserName = user.Email;
+                userActivityTable.GeneratedToken = token;
+                userActivityTable.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+                _context.UserActivityTables.Add(userActivityTable);
+                _context.SaveChanges();
+
                 return Ok(token);
 
             }

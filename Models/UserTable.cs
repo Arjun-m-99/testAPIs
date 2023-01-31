@@ -23,7 +23,9 @@ public partial class UserTable
 
     public DateTime CreatedDate { get; set; }
 
-    public string? Role { get; set;}
+    public string Role { get; set; } = null!;
+
+    public virtual ICollection<UserActivityTable> UserActivityTables { get; } = new List<UserActivityTable>();
 }
 
 public class LogInReqBody
@@ -32,4 +34,3 @@ public class LogInReqBody
 
     public string Password { get; set; } = null!;
 }
-
