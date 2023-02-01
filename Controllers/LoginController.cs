@@ -25,6 +25,8 @@ namespace testAPIs.Controllers
     {
 
         private readonly IConfiguration _config;
+        //private readonly IHttpContextAccessor _accessor;
+
         //public LoginController(IConfiguration config)
         //{
         //    _config = config;
@@ -37,6 +39,8 @@ namespace testAPIs.Controllers
             _context = context;
 
             _config = config;
+
+            //_accessor = accessor;
         }
 
         // GET: api/Login
@@ -194,7 +198,7 @@ namespace testAPIs.Controllers
                 userActivityTable.UserId = user.Id;
                 userActivityTable.UserName = user.Email;
                 userActivityTable.GeneratedToken = token;
-                userActivityTable.Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                userActivityTable.Ipaddress = HttpContext.Connection.RemoteIpAddress.ToString(); 
 
                 _context.UserActivityTables.Add(userActivityTable);
                 _context.SaveChanges();

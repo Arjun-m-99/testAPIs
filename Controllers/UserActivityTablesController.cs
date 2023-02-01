@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using NuGet.Protocol;
+using NuGet.Versioning;
 using testAPIs.Models;
 
 namespace testAPIs.Controllers
@@ -14,10 +19,13 @@ namespace testAPIs.Controllers
     public class UserActivityTablesController : ControllerBase
     {
         private readonly TestDbContext _context;
+        private readonly IHttpContextAccessor _accessor;
 
-        public UserActivityTablesController(TestDbContext context)
+        public UserActivityTablesController(TestDbContext context, IHttpContextAccessor accessor)
         {
             _context = context;
+
+            _accessor = accessor;
         }
 
         // GET: api/UserActivityTables
@@ -40,10 +48,23 @@ namespace testAPIs.Controllers
 
             return userActivityTable;
         }
+        [HttpGet("getById/{id}")]
+        public ActionResult<UserActivityTable> GetUserActivityTableByID(int id)
+        {
+
+            var userActivityTable =_context.UserActivityTables.Where(x => x.UserId == id);
+
+            if (userActivityTable == null || userActivityTable.IsNullOrEmpty())
+            {
+                return NotFound("No data found with ID-"+id);
+            }
+            
+            return Ok(userActivityTable);
+        }
 
         // PUT: api/UserActivityTables/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        //[HttpPut("{id}")]
         //public async Task<IActionResult> PutUserActivityTable(int id, UserActivityTable userActivityTable)
         //{
         //    if (id != userActivityTable.RowNumber)
@@ -74,7 +95,7 @@ namespace testAPIs.Controllers
 
         // POST: api/UserActivityTables
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        //[HttpPost]
         //public async Task<ActionResult<UserActivityTable>> PostUserActivityTable(UserActivityTable userActivityTable)
         //{
         //    _context.UserActivityTables.Add(userActivityTable);

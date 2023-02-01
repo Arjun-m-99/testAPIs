@@ -82,6 +82,8 @@ namespace testAPIs
 
             builder.Services.AddAuthorization();
 
+            builder.Services.AddHttpContextAccessor();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -102,5 +104,17 @@ namespace testAPIs
 
             app.Run();
         }
+        //public static void Configure(IApplicationBuilder app)
+        //{
+        //    app.UseMvc(routes =>
+        //    {
+        //        routes.MapRoute(
+        //            name: "default",
+        //            template: "{controller=Home}/{action=Index}/{id?}");
+        //    });
+        //}
     }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    
 }
