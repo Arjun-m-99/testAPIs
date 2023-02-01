@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using NuGet.Protocol;
 using NuGet.Versioning;
+using testAPIs.DTO;
 using testAPIs.Models;
 
 namespace testAPIs.Controllers
@@ -48,8 +49,8 @@ namespace testAPIs.Controllers
 
             return userActivityTable;
         }
-        [HttpGet("getById/{id}")]
-        public ActionResult<UserActivityTable> GetUserActivityTableByID(int id)
+        [HttpGet("getDataByUserId/{id}")]
+        public ActionResult<GetUserActivityTableDTO> GetUserActivityTableByID(int id)
         {
 
             var userActivityTable =_context.UserActivityTables.Where(x => x.UserId == id);
