@@ -58,7 +58,7 @@ namespace testAPIs.Controllers
                     LastName = userTable.LastName,
                     Email = userTable.Email,
                     PhoneNumber = userTable.PhoneNumber,
-                    AadharNumber = userTable.AadharNumber,
+                    AadharNumber = DecodeFrom64(userTable.AadharNumber),
                     //getUserTableDTO1.Passport = userTable.Passport;
                     Passport = DecodeFrom64(userTable.Passport),
                     Role = userTable.Role,
@@ -71,7 +71,7 @@ namespace testAPIs.Controllers
 
         }
 
-        //this function Convert to Encord your Password
+        //this function Convert to Encord Passport
         private static string EncodeToBase64(string passportNumber)
         {
             //try
@@ -90,7 +90,8 @@ namespace testAPIs.Controllers
             //    throw new Exception("Error in base64Encode" + ex.Message);
             //}
         }
-        //this function Convert to Decord your Password
+
+        //this function Convert to Decord passportNumber
         private static string DecodeFrom64(string encodedData)
         {
             if (encodedData != null)
@@ -127,7 +128,7 @@ namespace testAPIs.Controllers
             userDetails.LastName = userTable.LastName;
             userDetails.PhoneNumber = userTable.PhoneNumber;
             userDetails.Email = userTable.Email;
-            userDetails.AadharNumber = userTable.AadharNumber;  
+            userDetails.AadharNumber = DecodeFrom64(userTable.AadharNumber);  
             //userDetails.Passport = userTable.Passport;
             userDetails.Passport = DecodeFrom64(userTable.Passport);
             userDetails.Role = userTable.Role;
@@ -152,7 +153,7 @@ namespace testAPIs.Controllers
             userDetails.LastName = userTableDTO.LastName;
             userDetails.PhoneNumber = userTableDTO.PhoneNumber;
             userDetails.Email = userTableDTO.Email;
-            userDetails.AadharNumber = userTableDTO.AadharNumber;
+            userDetails.AadharNumber = EncodeToBase64(userTableDTO.AadharNumber);
             userDetails.Password = userTableDTO.Password;
             userDetails.Passport = EncodeToBase64(userTableDTO.Passport);
             //userDetails.Role = userTableDTO.Role;
@@ -190,7 +191,7 @@ namespace testAPIs.Controllers
 
             //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
-            var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.Email && x.Password == logInReqBody.Password);
+            var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.Email.ToLower() && x.Password == logInReqBody.Password);
 
             if (user != null)
             {
@@ -246,7 +247,7 @@ namespace testAPIs.Controllers
             userDetails.FirstName = userTableDto.FirstName;
             userDetails.LastName = userTableDto.LastName;
             userDetails.PhoneNumber = userTableDto.PhoneNumber;
-            userDetails.Email = userTableDto.Email;
+            userDetails.Email = userTableDto.Email.ToLower();
             userDetails.AadharNumber = userTableDto.AadharNumber;
             userDetails.Password = userTableDto.Password;
             userDetails.Passport = EncodeToBase64(userTableDto.Passport);

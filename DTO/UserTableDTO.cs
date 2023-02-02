@@ -12,7 +12,7 @@
 
         public string? Passport { get; set; }
 
-        public long? AadharNumber { get; set; }
+        public string? AadharNumber { get; set; }
 
         //public DateTime CreatedDate { get; set; }
 
