@@ -25,7 +25,7 @@
 
     }
 
-    public class UpdateUserTableDTO : CreateUserTableDTO
+    public class UpdateUserTableDTO : UserTableDTO
     {
         public int Id { get; set; }
 

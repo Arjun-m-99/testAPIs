@@ -154,7 +154,7 @@ namespace testAPIs.Controllers
             userDetails.PhoneNumber = userTableDTO.PhoneNumber;
             userDetails.Email = userTableDTO.Email;
             userDetails.AadharNumber = EncodeToBase64(userTableDTO.AadharNumber);
-            userDetails.Password = userTableDTO.Password;
+            //userDetails.Password = userTableDTO.Password;
             userDetails.Passport = EncodeToBase64(userTableDTO.Passport);
             //userDetails.Role = userTableDTO.Role;
 
