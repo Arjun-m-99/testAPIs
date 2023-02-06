@@ -141,22 +141,32 @@ namespace testAPIs.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserTable(int id, UpdateUserTableDTO userTableDTO)
         {
+            //var roles = new AuthorizeAttribute();
 
             if (id != userTableDTO.Id)
             {
-                return BadRequest();
+                return BadRequest("Id not matching");
             }
 
             var userDetails = await _context.UserTables.FindAsync(id);
-            //userDetails.Id = id;
-            userDetails.FirstName = userTableDTO.FirstName;
-            userDetails.LastName = userTableDTO.LastName;
-            userDetails.PhoneNumber = userTableDTO.PhoneNumber;
-            userDetails.Email = userTableDTO.Email;
-            userDetails.AadharNumber = EncodeToBase64(userTableDTO.AadharNumber);
-            //userDetails.Password = userTableDTO.Password;
-            userDetails.Passport = EncodeToBase64(userTableDTO.Passport);
-            //userDetails.Role = userTableDTO.Role;
+            if (userDetails is not null)
+            {
+                //userDetails.Id = id;
+                userDetails.FirstName = userTableDTO.FirstName;
+                userDetails.LastName = userTableDTO.LastName;
+                userDetails.PhoneNumber = userTableDTO.PhoneNumber;
+                //userDetails.Email = userTableDTO.Email.ToLower();
+                userDetails.AadharNumber = EncodeToBase64(userTableDTO.AadharNumber);
+                //userDetails.Password = userTableDTO.Password;
+                userDetails.Passport = EncodeToBase64(userTableDTO.Passport);
+                //userDetails.Role = userTableDTO.Role;
+                //Console.WriteLine(roles.Roles == null);
+                //Console.ReadLine();
+                //if (roles.Roles == "ADMIN")
+                //{
+                //    userDetails.Email = userTableDTO.Email;
+                //}
+            }
 
             _context.Entry(userDetails).State = EntityState.Modified;
 
@@ -188,7 +198,11 @@ namespace testAPIs.Controllers
         public ActionResult UserLogin(LogInReqBody logInReqBody)
         {
             var userActivityTable = new UserActivityTable();
-
+            //var roles = new AuthorizeAttribute();
+            //Console.WriteLine(roles);
+            //Console.ReadLine();
+            //Console.WriteLine(roles.Roles+" Roles");
+            //Console.ReadLine();
             //var userTable = await _context.UserTables.Where(x => x.Email == logInReqBody.email && x.Password == logInReqBody.password).FirstOrDefaultAsync();
 
             var user = _context.UserTables.SingleOrDefault(x => x.Email == logInReqBody.Email.ToLower() && x.Password == logInReqBody.Password);
@@ -220,8 +234,8 @@ namespace testAPIs.Controllers
                 new Claim(ClaimTypes.Role,user.Role)
             };
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha384Signature);
             
             var token = new JwtSecurityToken(
                 _config["Jwt:Issuer"],
@@ -294,7 +308,7 @@ namespace testAPIs.Controllers
             _context.UserTables.Remove(userTable);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("User deleted Successfully");
         }
 
         private bool UserTableExists(int id)
