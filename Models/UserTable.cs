@@ -26,11 +26,13 @@ public partial class UserTable
     public string Role { get; set; } = null!;
 
     public virtual ICollection<UserActivityTable> UserActivityTables { get; } = new List<UserActivityTable>();
+
+    public virtual ICollection<UserAddressTable> UserAddressTables { get; } = new List<UserAddressTable>();
 }
 
-public class LogInReqBody
-{
-    public string Email { get; set; } = null!;
+//public class LogInReqBody
+//{
+//    public string Email { get; set; } = null!;
 
-    public string Password { get; set; } = null!;
-}
+//    public string Password { get; set; } = null!;
+//}

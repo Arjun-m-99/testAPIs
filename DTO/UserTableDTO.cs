@@ -1,4 +1,7 @@
-﻿namespace testAPIs.DTO
+﻿using System.ComponentModel.DataAnnotations;
+using testAPIs.Models;
+
+namespace testAPIs.DTO
 {
     public class UserTableDTO
     {
@@ -12,7 +15,10 @@
 
         public string? Passport { get; set; }
 
+        [MinLength(16)]
         public string? AadharNumber { get; set; }
+
+        public virtual UserAddressTableDTO Address { get; set; } = null!;
 
         //public DateTime CreatedDate { get; set; }
 

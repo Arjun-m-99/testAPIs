@@ -17,6 +17,8 @@ public partial class TestDbContext : DbContext
 
     public virtual DbSet<UserActivityTable> UserActivityTables { get; set; }
 
+    public virtual DbSet<UserAddressTable> UserAddressTables { get; set; }
+
     public virtual DbSet<UserTable> UserTables { get; set; }
 
 //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -53,6 +55,33 @@ public partial class TestDbContext : DbContext
                 .HasConstraintName("FK_UserActivityTable_UserTable");
         });
 
+        modelBuilder.Entity<UserAddressTable>(entity =>
+        {
+            entity.HasKey(e => e.RowNumber).HasName("PK_UT_Addresses");
+
+            entity.ToTable("UserAddressTable");
+
+            entity.Property(e => e.AddedTime)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.AddressLine1).IsUnicode(false);
+            entity.Property(e => e.AddressLine2).IsUnicode(false);
+            entity.Property(e => e.AddressLine3).IsUnicode(false);
+            entity.Property(e => e.CountryName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.StateName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.UserName).IsUnicode(false);
+
+            entity.HasOne(d => d.IdNavigation).WithMany(p => p.UserAddressTables)
+                .HasForeignKey(d => d.Id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserAddressTable_UserTable");
+        });
+
         modelBuilder.Entity<UserTable>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_UserTable_1");
@@ -64,6 +93,7 @@ public partial class TestDbContext : DbContext
             entity.HasIndex(e => e.PhoneNumber, "PhoneNumber_UserTable").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.AadharNumber).IsUnicode(false);
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

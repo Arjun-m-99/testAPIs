@@ -254,23 +254,44 @@ namespace testAPIs.Controllers
         [Route("/signUp")]
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<GetUserTableDTO>> UserSignUp(CreateUserTableDTO userTableDto)
+        public async Task<ActionResult<GetUserTableDTO>> UserSignUp(CreateUserTableDTO[] userTableDto)
         {
-            var userDetails = new UserTable();
-            //userDetails.Id = id;
-            userDetails.FirstName = userTableDto.FirstName;
-            userDetails.LastName = userTableDto.LastName;
-            userDetails.PhoneNumber = userTableDto.PhoneNumber;
-            userDetails.Email = userTableDto.Email.ToLower();
-            userDetails.AadharNumber = userTableDto.AadharNumber;
-            userDetails.Password = userTableDto.Password;
-            userDetails.Passport = EncodeToBase64(userTableDto.Passport);
+            var address = new UserAddressTable();
+            for(int i=0; i< userTableDto.Length; i++)
+            {
+                var userDetails = new UserTable();
+                //userDetails.Id = id;
+                userDetails.FirstName = userTableDto[i].FirstName;
+                userDetails.LastName = userTableDto[i].LastName;
+                userDetails.PhoneNumber = userTableDto[i].PhoneNumber;
+                userDetails.Email = userTableDto[i].Email.ToLower();
+                userDetails.AadharNumber = EncodeToBase64(userTableDto[i].AadharNumber);
+                userDetails.Password = userTableDto[i].Password;
+                userDetails.Passport = EncodeToBase64(userTableDto[i].Passport);
+                _context.UserTables.Add(userDetails);
+                await _context.SaveChangesAsync();
+
+                //Adding address
+                address.Id = userDetails.Id;
+                address.AddressLine1 = userTableDto[i].Address.AddressLine1;
+                address.AddressLine2 = userTableDto[i].Address.AddressLine2;
+                address.AddressLine3 = userTableDto[i].Address.AddressLine3;
+                address.CountryName = userTableDto[i].Address.CountryName;
+                address.UserName = userDetails.Email;
+                address.StateName = userTableDto[i].Address.StateName;
+                address.Zipcode = userTableDto[i].Address.Zipcode;
+                _context.UserAddressTables.Add(address);
+
+                await _context.SaveChangesAsync();
+
+            }
+
             //userDetails.Role = userTable.Role;
             //try
             //{
             //userTable.Passport = EncodeToBase64(userTableDto.Passport);
-                _context.UserTables.Add(userDetails);
-                await _context.SaveChangesAsync();
+            //_context.UserTables.Add(userDetails);
+            //await _context.SaveChangesAsync();
             //}
             //catch (Exception ex)
             //{
@@ -291,7 +312,8 @@ namespace testAPIs.Controllers
             //}
 
             //return CreatedAtAction("GetUserTable", new { id = userDetails.Id }, userDetails);
-            return Ok(GetUserTable(userDetails.Id).Result.Value);
+            //return Ok(GetUserTable(userDetails.Id).Result.Value);
+            return Ok("User deatils added "+ address.Id);
         }
 
         // DELETE: api/Login/5

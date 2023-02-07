@@ -75,7 +75,7 @@ namespace testAPIs.Controllers
         // POST: api/UserTables
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UserTable>> PostUserTable(UserTable userTable)
+        public async Task<ActionResult<UserTable>> PostUserTable([FromBody] UserTable userTable)
         {
             _context.UserTables.Add(userTable);
             await _context.SaveChangesAsync();
