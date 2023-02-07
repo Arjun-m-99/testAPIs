@@ -256,9 +256,10 @@ namespace testAPIs.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<GetUserTableDTO>> UserSignUp(CreateUserTableDTO[] userTableDto)
         {
-            var address = new UserAddressTable();
+            //var address = new UserAddressTable();
             for(int i=0; i< userTableDto.Length; i++)
             {
+                var address = new UserAddressTable();
                 var userDetails = new UserTable();
                 //userDetails.Id = id;
                 userDetails.FirstName = userTableDto[i].FirstName;
@@ -313,7 +314,7 @@ namespace testAPIs.Controllers
 
             //return CreatedAtAction("GetUserTable", new { id = userDetails.Id }, userDetails);
             //return Ok(GetUserTable(userDetails.Id).Result.Value);
-            return Ok("User deatils added "+ address.Id);
+            return Ok("User deatils added ");
         }
 
         // DELETE: api/Login/5
