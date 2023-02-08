@@ -257,36 +257,69 @@ namespace testAPIs.Controllers
         public async Task<ActionResult<GetUserTableDTO>> UserSignUp(CreateUserTableDTO[] userTableDto)
         {
             //var address = new UserAddressTable();
-            for(int i=0; i< userTableDto.Length; i++)
+            //for(int i=0; i< userTableDto.Length; i++)
+            //{
+            //    var address = new UserAddressTable();
+            //    var userDetails = new UserTable();
+            //    //userDetails.Id = id;
+            //    userDetails.FirstName = userTableDto[i].FirstName;
+            //    userDetails.LastName = userTableDto[i].LastName;
+            //    userDetails.PhoneNumber = userTableDto[i].PhoneNumber;
+            //    userDetails.Email = userTableDto[i].Email.ToLower();
+            //    userDetails.AadharNumber = EncodeToBase64(userTableDto[i].AadharNumber);
+            //    userDetails.Password = userTableDto[i].Password;
+            //    userDetails.Passport = EncodeToBase64(userTableDto[i].Passport);
+            //    _context.UserTables.Add(userDetails);
+            //    await _context.SaveChangesAsync();
+
+            //    //Adding address
+            //    address.Id = userDetails.Id;
+            //    address.AddressLine1 = userTableDto[i].Address.AddressLine1;
+            //    address.AddressLine2 = userTableDto[i].Address.AddressLine2;
+            //    address.AddressLine3 = userTableDto[i].Address.AddressLine3;
+            //    address.CountryName = userTableDto[i].Address.CountryName;
+            //    address.UserName = userDetails.Email;
+            //    address.StateName = userTableDto[i].Address.StateName;
+            //    address.Zipcode = userTableDto[i].Address.Zipcode;
+            //    _context.UserAddressTables.Add(address);
+
+            //    await _context.SaveChangesAsync();
+
+            //}
+
+            //Simplified using foreach
+            foreach(CreateUserTableDTO userDetailsFromBody in userTableDto)
             {
-                var address = new UserAddressTable();
-                var userDetails = new UserTable();
-                //userDetails.Id = id;
-                userDetails.FirstName = userTableDto[i].FirstName;
-                userDetails.LastName = userTableDto[i].LastName;
-                userDetails.PhoneNumber = userTableDto[i].PhoneNumber;
-                userDetails.Email = userTableDto[i].Email.ToLower();
-                userDetails.AadharNumber = EncodeToBase64(userTableDto[i].AadharNumber);
-                userDetails.Password = userTableDto[i].Password;
-                userDetails.Passport = EncodeToBase64(userTableDto[i].Passport);
+                
+                //Adding User details
+                var userDetails = new UserTable
+                {
+                    FirstName = userDetailsFromBody.FirstName,
+                    LastName = userDetailsFromBody.LastName,
+                    PhoneNumber = userDetailsFromBody.PhoneNumber,
+                    Email = userDetailsFromBody.Email,
+                    Password = userDetailsFromBody.Password,
+                    Passport = EncodeToBase64(userDetailsFromBody.Passport),
+                    AadharNumber = EncodeToBase64(userDetailsFromBody.AadharNumber)
+                };
                 _context.UserTables.Add(userDetails);
                 await _context.SaveChangesAsync();
 
                 //Adding address
-                address.Id = userDetails.Id;
-                address.AddressLine1 = userTableDto[i].Address.AddressLine1;
-                address.AddressLine2 = userTableDto[i].Address.AddressLine2;
-                address.AddressLine3 = userTableDto[i].Address.AddressLine3;
-                address.CountryName = userTableDto[i].Address.CountryName;
-                address.UserName = userDetails.Email;
-                address.StateName = userTableDto[i].Address.StateName;
-                address.Zipcode = userTableDto[i].Address.Zipcode;
+                var address = new UserAddressTable
+                {
+                    Id = userDetails.Id,
+                    UserName = userDetails.Email,
+                    AddressLine1 = userDetailsFromBody.Address.AddressLine1,
+                    AddressLine2 = userDetailsFromBody.Address.AddressLine2,
+                    AddressLine3 = userDetailsFromBody.Address.AddressLine3,
+                    CountryName = userDetailsFromBody.Address.CountryName,
+                    StateName = userDetailsFromBody.Address.StateName,
+                    Zipcode = userDetailsFromBody.Address.Zipcode
+                };
                 _context.UserAddressTables.Add(address);
-
                 await _context.SaveChangesAsync();
-
             }
-
             //userDetails.Role = userTable.Role;
             //try
             //{

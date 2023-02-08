@@ -11,11 +11,12 @@ namespace testAPIs.DTO
 
         public long PhoneNumber { get; set; }
 
+        [EmailAddress]
         public string Email { get; set; } = null!;
 
         public string? Passport { get; set; }
 
-        [MinLength(16)]
+        [StringLength(16, MinimumLength = 16, ErrorMessage = "Aadhar number should be 16 digits!!")]
         public string? AadharNumber { get; set; }
 
         public virtual UserAddressTableDTO Address { get; set; } = null!;
