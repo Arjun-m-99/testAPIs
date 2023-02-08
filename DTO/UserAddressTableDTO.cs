@@ -21,4 +21,12 @@
         //public DateTime AddedTime { get; set; }
 
     }
+    public class GetUserAddressDetailsDTO : UserAddressTableDTO
+    {
+        public int Id { get; set; }
+
+        public string UserName { get; set; } = null!;
+
+        public DateTime AddedTime { get; set; }
+    }
 }
